@@ -12,5 +12,19 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def todo_json(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'task': self.task,
+            'status': self.status,
+            'description': self.description,
+            'created_at': self.created_at,
+            'updated_at': self.updated_at
+        }
+
+    def __str__(self):
+        return self.title
+
     def __str__(self):
         return self.task

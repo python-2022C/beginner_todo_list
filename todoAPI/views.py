@@ -79,34 +79,7 @@ class UpdateTask(View):
 
 
 
-class GetAllTaskView(View):
-    def get(self, request):
-        """
-        Get all tasks
 
-        args:
-            request: HTTP request
-
-        returns:  JSON response      
-        """
-
-
-       
-        tasks = Task.objects.all()
-        json = {'results':[]}
-        for i in tasks:
-            json['results'].append({
-                'id': i.id,
-                'task': i.task,
-                'description': i.description,
-                'status': i.status,
-                'created_at': i.created_at,
-                'updated_at': i.updated_at,
-            })
-
-        
-        return JsonResponse(json)
-        
 class GetTask(View):
     def get(self, request, id):
         """
@@ -147,10 +120,12 @@ class CreateTask(View):
 
         """
 
-        auth = request.headers.get('Authorization', None)
-
+        # Get the authorization header
+        auth = request.headers.get('Authorization', None) 
+        # If no authorization header was provided, return an error message
         if auth:
-            username, password = decode_auth_header(auth)
+            # Decode the authorization header
+            username, password = decode_auth_header(auth) 
             # authenticate the user
             user = authenticate(username=username, password=password) 
             if user:
@@ -168,6 +143,47 @@ class CreateTask(View):
          
         else:
             return JsonResponse({'error': 'Authorization header is missing'}, status=401)
+
+    def get(self, request):
+        """
+        Get all tasks
+
+        args:
+            request: HTTP request
+
+        returns:  JSON response      
+        """
+
+
+        # Get the authorization header
+        auth_header = request.headers.get('Authorization')
+        # Check if the header is present
+        if auth_header:
+            # Decode the authorization header
+            username, password = decode_auth_header(auth_header)
+            # Check if the username and password are correct
+            user = authenticate(username=username, password=password)
+            # If the username and password are correct
+            if user:
+                # Get all user tasks
+                tasks = Task.objects.filter(user=user)
+                # Convert the tasks to JSON
+                json_tasks = [task.to_json() for task in tasks]
+                # Return the JSON response
+                return JsonResponse(json_tasks, safe=False)
+
+        # If the username and password are incorrect
+            else:
+                # Return an error message
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+
+        # If the authorization header is not present
+        else:
+            # Return an error message
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
+        
+
+       
 
 
         

@@ -8,6 +8,7 @@ urlpatterns = [
    
     path('api/tasks/', CreateTask.as_view()),
     
+    
 
 
 ]

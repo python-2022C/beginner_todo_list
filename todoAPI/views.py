@@ -16,4 +16,4 @@ class GetTask(View):
         """
         task = Task.object.get(id=id)
 
-        return JsonResponse({'task': task.jo_json()})
+        return JsonResponse({'task': task.to_json()})

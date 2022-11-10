@@ -15,7 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from todoAPI.views import GetTask
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('get/<int:id>/', GetTask.as_view())
 ]

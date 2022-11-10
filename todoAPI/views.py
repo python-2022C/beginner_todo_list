@@ -5,8 +5,7 @@ from django.http import JsonResponse
 from .models import User,Task
 from base64 import b64encode, b64decode
 
-
-
+from django.contrib.auth import authenticate
 # Define a function decode_auth_header() that takes the authorization header as input and returns username and password
 
 def decode_auth_header(auth_header):
@@ -149,9 +148,17 @@ class CreateTask(View):
         """
 
         auth = request.headers.get('Authorization', None)
+
         if auth:
             username, password = decode_auth_header(auth)
-            return JsonResponse({'username': username, 'password': password})
+            # authenticate the user
+            user = authenticate(username=username, password=password) 
+            if user:
+                # Create user object
+                user = User.objects.get(username=username)
+            else:
+                return JsonResponse({'message': 'Invalid credentials'})         
+         
         else:
             return JsonResponse({'error': 'Authorization header is missing'}, status=401)
 

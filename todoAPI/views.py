@@ -156,6 +156,13 @@ class CreateTask(View):
             if user:
                 # Create user object
                 user = User.objects.get(username=username)
+                # Get the data from the request
+                task = request.POST['task']
+                description = request.POST['description']
+                # Create a task object
+                task = Task.objects.create(user=user, task=task, description=description)
+                # Return the task object
+                return JsonResponse(task.to_json())
             else:
                 return JsonResponse({'message': 'Invalid credentials'})         
          

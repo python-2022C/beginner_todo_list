@@ -1,16 +1,13 @@
 from django.contrib import admin
 from django.urls import path
-from todoAPI.views import CreateTask,UpdateTask,GetAllTaskView
+from todoAPI.views import CreateTask
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    path('api/tasks/all', GetAllTaskView.as_view()),
-    path('get/<int:id>/', GetTask.as_view())
-
-
-
-
+   
+    path('api/tasks/', CreateTask.as_view()),
+    
 
 
 ]

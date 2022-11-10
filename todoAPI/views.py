@@ -3,55 +3,33 @@ from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
 from .models import User,Task
+from base64 import b64encode, b64decode
 
-class CreateTask(View):
-    def post(self, request):
-        """
-        Create a task
 
-        args:
-            request: HTTP request
-            username: string
-            password: string
-            task: string
-            description: string
-        
-        returns:  JSON response
-        id: int
-        task: string
-        description: string
-        status: boolean
-        created_at: datetime
-        updated_at: datetime
 
-        """
-        data=request.POST
-        username=request.POST['username']
-        password=request.POST['password']
-        task=request.POST['tasks']
-        description = request.POST['description']
-        
-        
-        if not (User.objects.filter(username=username)):
-            new_user=User.objects.create(username=username, password=password)
-            new_user.save()
-        if data.get('username'):
-            user=User.objects.get(username=request.POST['username'])
-        elif data.get('id'):
-            eser=User.objects.get(id=int(request.POST['id']))
+# Define a function decode_auth_header() that takes the authorization header as input and returns username and password
 
-        new_task=Task(user=user,tasks=task, description=description)
-        new_task.save()
+def decode_auth_header(auth_header):
+    """
+    Decodes the authorization header
+    
+    args:
+        auth_header: string
+    returns:
+        username: string
+        password: string
+    """ 
+    # Get the token from the header
+    token = auth_header.split(" ")[1]
+    # Decode the token
+    decoded_token = b64decode(token).decode('utf-8')
+    # Split the token into username and password
+    username, password = decoded_token.split(':')
+    # Return the username and password
+    return username, password
 
-        json_task={
-            'id':new_task.id,
-            'task':new_task.tasks,
-            'description':new_task.description,
-            'status':new_task.status,
-            'created_at':new_task.created_at,
-            'updated_id':new_task.updated_id,
-        } 
-        return JsonResponse(json_task)
+
+
 
 
 class UpdateTask(View):
@@ -170,17 +148,15 @@ class CreateTask(View):
 
         """
 
+        auth = request.headers.get('Authorization', None)
+        if auth:
+            username, password = decode_auth_header(auth)
+            return JsonResponse({'username': username, 'password': password})
+        else:
+            return JsonResponse({'error': 'Authorization header is missing'}, status=401)
 
-        task = Task.objects.create(
-            task = request.POST['task'],
-            description = request.POST['description'],
-            user = User.objects.get(username=request.POST['user'])
-        )
-
-        return JsonResponse({'task': task.to_json()})
 
         
 
-
-
+        
 

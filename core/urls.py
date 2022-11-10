@@ -16,11 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from todoAPI.models import Task
-from todoAPI.views import GetAllTaskView, CreateTask
+from todoAPI.views import GetAllTaskView
 from django.views import View
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/tasks/all', GetAllTaskView.as_view()),
-    path('api/tasks', CreateTask.as_view())
 ]

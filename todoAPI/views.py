@@ -111,8 +111,10 @@ class GetAllTaskView(View):
             request: HTTP request
 
         returns:  JSON response      
+        """
 
-       users = request.POST
+
+       
         tasks = Task.objects.all()
         json = {'results':[]}
         for i in tasks:

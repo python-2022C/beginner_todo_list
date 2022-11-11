@@ -4,7 +4,6 @@ from django.views import View
 from django.http import JsonResponse
 from .models import User,Task
 from base64 import b64encode, b64decode
-
 from django.contrib.auth import authenticate
 # Define a function decode_auth_header() that takes the authorization header as input and returns username and password
 
@@ -26,10 +25,6 @@ def decode_auth_header(auth_header):
     username, password = decoded_token.split(':')
     # Return the username and password
     return username, password
-
-
-
-
 
 class UpdateTask(View):
     def post(self, request, id):
@@ -76,26 +71,37 @@ class UpdateTask(View):
 
         return JsonResponse(json_task)
 
-
-
-
-
 class GetTask(View):
     def get(self, request, id):
         """
-        Get task
+        Get a task
+
         args:
-            request: the request object
-            id: the task id
-        return:
-            JsonRespons: the response object
+            request: HTTP request
+            id: int
+
+        returns:  JSON response      
+        id: int
+        task: string
+        description: string
+        status: boolean
+        created_at: datetime
+        updated_at: datetime
+
         """
-        task = Task.object.get(id=id)
-
-        return JsonResponse({'task': task.to_json()})
-
-
-
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            username, password = decode_auth_header(auth_header)
+            user = authenticate(username = username, password = password)
+            if user:
+                tasks = Task.objects.filter(user = user)
+                for i in tasks:
+                    if i.to_json()['id'] == id:
+                        return JsonResponse(i.to_json())
+            else:
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+        else:
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
 
 class CreateTask(View):
     def post(self, request):
@@ -127,7 +133,7 @@ class CreateTask(View):
             # Decode the authorization header
             username, password = decode_auth_header(auth) 
             # authenticate the user
-            user = authenticate(username=username, password=password) 
+            user = authenticate(username=username, password=password)
             if user:
                 # Create user object
                 user = User.objects.get(username=username)
@@ -182,7 +188,6 @@ class CreateTask(View):
             # Return an error message
             return JsonResponse({'error': 'Authorization header is not present'}, status=401)
         
-
        
 
 

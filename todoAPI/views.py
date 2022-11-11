@@ -312,4 +312,33 @@ class GetCompletedTask(View):
         else:
             return JsonResponse({'error': 'Authorization header is not present'}, status=401)
         
+class GetIncompleteTask(View):
+    def get(self, request):
+        """
+        Get incomplete tasks
+        args:
+            request: HTTP request
+        returns:  JSON response
+        id: int
+        task: string
+        description: string
+        status: boolean
+        created_at: datetime
+        updated_at: datetime
+        """
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            username, password = decode_auth_header(auth_header)
+            user = authenticate(username = username, password = password)
+            if user:
+                tasks = Task.objects.filter(user = user)
+                json = {'results':[]}
+                for i in tasks:
+                    if i.to_json()['status'] == False:
+                        json['results'].append(i.to_json())
+                return JsonResponse(json)
+            else:
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+        else:
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
 

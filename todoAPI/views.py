@@ -98,6 +98,7 @@ class GetTask(View):
                 for i in tasks:
                     if i.to_json()['id'] == id:
                         return JsonResponse(i.to_json())
+                return JsonResponse({"error":'there is no such todo'})
             else:
                 return JsonResponse({'error': 'Incorrect username or password'}, status=401)
         else:
@@ -187,8 +188,42 @@ class CreateTask(View):
         else:
             # Return an error message
             return JsonResponse({'error': 'Authorization header is not present'}, status=401)
-        
-       
+
+class DeleteTask(View):
+    def get(self, request, id):
+        """
+        Delete a task
+
+        args:
+            request: HTTP request
+            id: int
+
+        returns:  JSON response
+        id: int
+        task: string
+        description: string
+        status: boolean
+        created_at: datetime
+        updated_at: datetime
+        """
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            username, password = decode_auth_header(auth_header)
+            user = authenticate(username = username, password = password)
+            if user:
+                tasks = Task.objects.filter(user = user)
+                for i in tasks:
+                    if i.to_json()['id'] == id:
+                        delete_json = i.to_json()
+                        i.delete()
+                        return JsonResponse(delete_json)
+                return JsonResponse({"error":'there is no such todo'})
+            else:
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+        else:
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
+
+    
 
 
         

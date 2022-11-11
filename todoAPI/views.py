@@ -250,7 +250,37 @@ class GetAllTaskView(View):
         else:
             return JsonResponse({'error': 'Authorization header is not present'}, status=401)
 
-
+class CompleteTask(View):
+    def get(self, request, id):
+        """
+        Complete a task
+        args:
+            request: HTTP request
+            id: int
+        returns:  JSON response
+        id: int
+        task: string
+        description: string
+        status: boolean
+        created_at: datetime
+        updated_at: datetime
+        """
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            username, password = decode_auth_header(auth_header)
+            user = authenticate(username = username, password = password)
+            if user:
+                tasks = Task.objects.filter(user = user)
+                for i in tasks:
+                    if i.to_json()['id'] == id:
+                        i.status = True
+                        i.save()
+                        return JsonResponse(i.to_json())
+                return JsonResponse({"error":'there is no such todo'})
+            else:
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+        else:
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
         
 
         

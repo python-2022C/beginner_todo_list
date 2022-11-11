@@ -26,84 +26,6 @@ def decode_auth_header(auth_header):
     # Return the username and password
     return username, password
 
-class UpdateTask(View):
-    def post(self, request, id):
-        """
-        Update a task
-
-        args:
-            request: HTTP request
-            id: int
-            task: string
-            description: string
-            status: boolean
-        
-        returns:  JSON response
-        id: int
-        task: string
-        description: string
-        status: boolean
-        created_at: datetime
-        updated_at: datetime
-
-        """
-        data=request.POST
-        task=data['tasks']
-        description=data['description']
-        status=data['status']
-        all_task=Task.objects.all()
-
-        for i in all_task:
-            if i.id == id:
-                i.tasks = task
-                i.status=status
-                i.description=description
-                i.save()
-
-                json_task={
-                    'id':i.id,
-                    'task':i.tasks,
-                    'description':i.description,
-                    'status':i.status,
-                    'created_at':i.created_at,
-                    'updated_id':i.updated_id,
-                }
-
-        return JsonResponse(json_task)
-
-class GetTask(View):
-    def get(self, request, id):
-        """
-        Get a task
-
-        args:
-            request: HTTP request
-            id: int
-
-        returns:  JSON response      
-        id: int
-        task: string
-        description: string
-        status: boolean
-        created_at: datetime
-        updated_at: datetime
-
-        """
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            username, password = decode_auth_header(auth_header)
-            user = authenticate(username = username, password = password)
-            if user:
-                tasks = Task.objects.filter(user = user)
-                for i in tasks:
-                    if i.to_json()['id'] == id:
-                        return JsonResponse(i.to_json())
-                return JsonResponse({"error":'there is no such todo'})
-            else:
-                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
-        else:
-            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
-
 class CreateTask(View):
     def post(self, request):
         """
@@ -189,6 +111,47 @@ class CreateTask(View):
             # Return an error message
             return JsonResponse({'error': 'Authorization header is not present'}, status=401)
 
+class UpdateTask(View):
+    def post(self, request, id):
+        """
+        Update a task
+
+        args:
+            request: HTTP request
+            id: int
+            task: string
+            description: string
+            status: boolean
+        
+        returns:  JSON response
+        id: int
+        task: string
+        description: string
+        status: boolean
+        created_at: datetime
+        updated_at: datetime
+        """
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            username, password = decode_auth_header(auth_header)
+            user = authenticate(username = username, password = password)
+            if user:
+                tasks = Task.objects.filter(user = user)
+                for i in tasks:
+                    if i.to_json()['id'] == id:
+                        i.task = request.POST['task']
+                        i.description = request.POST['description']
+                        i.status = request.POST['status']
+                        i.save()
+                        return JsonResponse(i.to_json())
+                    else:
+                        return JsonResponse({{"error":'there is no such todo'}})
+            else:
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+        else:
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
+
+
 class DeleteTask(View):
     def get(self, request, id):
         """
@@ -223,7 +186,39 @@ class DeleteTask(View):
         else:
             return JsonResponse({'error': 'Authorization header is not present'}, status=401)
 
-    
+class GetTask(View):
+    def get(self, request, id):
+        """
+        Get a task
+
+        args:
+            request: HTTP request
+            id: int
+
+        returns:  JSON response      
+        id: int
+        task: string
+        description: string
+        status: boolean
+        created_at: datetime
+        updated_at: datetime
+
+        """
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            username, password = decode_auth_header(auth_header)
+            user = authenticate(username = username, password = password)
+            if user:
+                tasks = Task.objects.filter(user = user)
+                for i in tasks:
+                    if i.to_json()['id'] == id:
+                        return JsonResponse(i.to_json())
+                return JsonResponse({"error":'there is no such todo'})
+            else:
+                return JsonResponse({'error': 'Incorrect username or password'}, status=401)
+        else:
+            return JsonResponse({'error': 'Authorization header is not present'}, status=401)
+
 
 
         
